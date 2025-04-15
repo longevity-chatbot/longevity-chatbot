@@ -36,6 +36,33 @@ def search_arxiv(query="longevity biology", max_results=5):
         
     return papers
 
+def search_europe_pmc(query="longevity biology", limit = 10):
+    base_url="https://www.ebi.ac.uk/europepmc/webservices/rest/search"
+    params = {
+        "query": query,
+        "format": "json",
+        "pageSize": limit,
+        "resultType": "core"
+    }
+    
+    response = requests.get(base_url, params=params)
+    response.raise_for_status()
+    results = response.json()["resultList"]["result"]
+    
+    papers = []
+    
+    for entry in results:
+        papers.append({
+            "title": entry.get("title", ""),
+            "summary": entry.get("abstractText", ""),
+            "source":"EuropePMC",
+            "published": entry.get("pubYear", ""),
+            "doi": entry.get("doi", ""),
+            "fullTextUrl": entry.get("fullTextUrlList", {}).get("fullTextUrl", [{}])[0].get("url", "")
+        })
+        
+    return papers
+
 # Add emebedding
 def embed_abstracts(papers):
     abstracts = [p['summary'] for p in papers]
@@ -68,14 +95,18 @@ A:"""
 # Full Pipeline
 def answer_question_live(question):
     print(f"🔍 Searching arXiv for: {question}")
-    papers = search_arxiv(question, max_results=10)
+    arxiv_papers = search_arxiv(question, max_results=10)
+    pmc_papers = search_europe_pmc(question, limit=10)
     
-    if not papers:
-        return "No relevant papers found on arXiv."
+    all_papers = arxiv_papers + pmc_papers
+    all_papers = [p for p in all_papers if p.get("summary")] #filter out empty abstracts
+    
+    if not all_papers:
+        return "No relevant papers found."
 
-    print(f"📄 Found {len(papers)} papers. Embedding...")
-    embeddings = embed_abstracts(papers)
-    top_papers = retrieve_top_k(question, papers, embeddings, k=3)
+    print(f"📄 Found {len(all_papers)} papers. Embedding...")
+    embeddings = embed_abstracts(all_papers)
+    top_papers = retrieve_top_k(question, all_papers, embeddings, k=3)
 
     print(f"✍️ Generating answer using top {len(top_papers)} papers...")
     return ask_with_context(question, top_papers)
