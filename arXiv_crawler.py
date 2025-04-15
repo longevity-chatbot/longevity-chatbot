@@ -35,21 +35,6 @@ def search_arxiv(query="longevity biology", max_results=5):
         })
         
     return papers
-            
-        
-
-#def download_pdf(url, filename):
-    #try:
-     #   response = requests.get(url)
-      #  response.raise_for_status()
-       # with open(filename, "wb") as f:
-        #    f.write(response.content)
-        #print(f"Saved: {filename}\n")
-    #except Exception as e:
-     #   print(f"Failed to download {url}: {e}")
-
-# Example usage
-#search_arxiv("longevity biology", max_results=10)
 
 # Add emebedding
 def embed_abstracts(papers):
