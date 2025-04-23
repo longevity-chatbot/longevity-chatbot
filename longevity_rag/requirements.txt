@@ -1,0 +1,6 @@
+
+arxiv
+langchain
+sentence-transformers
+chromadb
+llama-cpp-python
