@@ -5,7 +5,7 @@ client = OpenAI(api_key="sk-proj-jqbwxJEg9S3ywCPERUxmkf7ISh9eMGS41YU4vx5iuH9VFbc
 
 # Prompt LLM 
 def ask_with_context(question, papers):
-    context = "\n\n".join(f"{p['title']}:\n{p['summary']}" for p in papers)
+    context = "\n\n".join(f"{p.metadata.get('title', 'Unknown Title')}:\n{p.page_content}" for p in papers)
     prompt = f"""You are an AI assistant trained in longevity science, cellular aging, motility, and mobility. Your job is to provide accurate, concise, and well-cited answers based on the provided context:
 
 {context}
