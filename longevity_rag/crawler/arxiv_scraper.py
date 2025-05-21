@@ -11,4 +11,5 @@ def fetch_papers(query="longevity", max_results=10):
             "authors": [a.name for a in result.authors],
             "url": result.entry_id
         })
+    print(papers)
     return papers
