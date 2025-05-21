@@ -1,15 +1,7 @@
 
-def generate_answer(vectorstore, query, llama_instance):
+def generate_context(vectorstore, query):
+    #performs a similarity search in the vectorstore to find the top 3 documents that are most similar to a given query.
     docs = vectorstore.similarity_search(query, k=3)
     context = "\n\n".join([doc.page_content for doc in docs])
 
-    prompt = f"""You are a scientific expert. Use the following context to answer:
-
-    Context: {context}
-
-    Question: {query}
-
-    Answer:"""
-
-    result = llama_instance(prompt, max_tokens=300)
-    return result["choices"][0]["text"].strip()
+    return context
