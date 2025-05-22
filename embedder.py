@@ -1,12 +1,12 @@
 from sentence_transformers import SentenceTransformer
 
-model = SentenceTransformer('all-MiniLM-L6-v2')
+embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
 
 # Add emebedding
-def embed_abstracts(papers):
-    abstracts = [p['summary'] for p in papers]
-    embeddings = model.encode(abstracts)
+def embed_abstracts(documents):
+    texts = [doc.page_content for doc in documents]
+    embeddings = embedding_model.encode(texts)
     return embeddings
 
 def embed_query(text):
-    return model.encode([text])
+    return embedding_model.encode([text])
