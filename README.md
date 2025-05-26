@@ -37,7 +37,7 @@ longevity_rag_project/
 │
 ├── llm/
 │   ├── llama_wrapper.py      # Loads LLaMA model using llama.cpp
-│   └── llama-2-7b-chat.Q4_K_M.gguf  # Place your model here
+│   └── llama-2-7b-chat.Q4_K_M.gguf 
 │
 └── main.py                   # Entry point for the QA system
 ```
