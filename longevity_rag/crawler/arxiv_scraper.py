@@ -1,6 +1,7 @@
 import requests
 import xml.etree.ElementTree as ET
 
+
 def fetch_papers(query, max_results):
     url = "http://export.arxiv.org/api/query"
     params = {
@@ -104,4 +105,3 @@ def check_peer_validity(paper, verbose=False):
     finally:
         time.sleep(1)  # Be respectful of API limits
 """
-

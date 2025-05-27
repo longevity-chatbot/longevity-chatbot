@@ -5,7 +5,7 @@ from llm.gpt_wrapper import ask_with_relevant_context
 
 def main():
 
-    question = "What are the effects of caloric restriction on lifespan?"
+    question = "What are the effects of smoking on human lifespan?"
 
     print("📚 Fetching papers...")
     papers = fetch_papers(question, max_results=10)
@@ -38,9 +38,11 @@ def main():
     print(f"\n❓ Question: {question}")
     
     print("🤖 Calling Chat Gpt 3.5 model...")
-    answer = ask_with_relevant_context(question, vectorstore)
+    answer, citations = ask_with_relevant_context(question, vectorstore)
+    #print(f"DEBUG result: {result}")
 
-    print(f"\n💡 Answer: {answer}")
+
+    print(f"\n💡 Answer: {answer}  \n✅ and Citations: {citations}")
 
 
 if __name__ == "__main__":

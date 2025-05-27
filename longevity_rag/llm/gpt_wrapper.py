@@ -8,7 +8,9 @@ client = OpenAI(api_key="sk-proj-jqbwxJEg9S3ywCPERUxmkf7ISh9eMGS41YU4vx5iuH9VFbc
 
 # Prompt LLM 
 def ask_with_relevant_context(question, vectorstore):
-    context = generate_context(vectorstore, question)
+    print("Running the correct ask_with_relevant_context")
+
+    context, citations = generate_context(vectorstore, question)
 
     prompt = f"""Use the following scientific context to answer the question:
 
@@ -21,4 +23,6 @@ A:"""
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": prompt}]
     )
-    return response.choices[0].message.content
+
+    answer = response.choices[0].message.content
+    return answer, citations
