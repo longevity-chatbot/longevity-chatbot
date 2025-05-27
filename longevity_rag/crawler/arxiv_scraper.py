@@ -32,14 +32,14 @@ def fetch_papers(query, max_results):
 
     return results
 
-
+"""
 import time
 
 def check_peer_validity(paper, verbose=False):
-    """
-    Check the peer validity of a paper using Semantic Scholar's API based on the title.
-    Returns a dictionary with metadata and a validity boolean.
-    """
+   
+    #Check the peer validity of a paper using Semantic Scholar's API based on the title.
+    #Returns a dictionary with metadata and a validity boolean.
+   
 
     # Sanitize title (remove line breaks, excess spaces)
     title = " ".join(paper["title"].replace("\n", " ").split())
@@ -103,5 +103,5 @@ def check_peer_validity(paper, verbose=False):
 
     finally:
         time.sleep(1)  # Be respectful of API limits
-
+"""
 

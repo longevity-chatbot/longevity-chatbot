@@ -1,6 +1,8 @@
 import os
 from openai import OpenAI
-from rag.qa_pipeline import generate_context
+from llm.qa_pipeline import generate_context
+
+
 
 client = OpenAI(api_key="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")
 
