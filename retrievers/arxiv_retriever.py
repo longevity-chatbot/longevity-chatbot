@@ -26,7 +26,7 @@ def search_arxiv(query="longevity biology", max_results=5):
             full_text = extract_text_from_pdf(pdf_bytes)
         except Exception as e:
             print(f"Failed to process {pdf_url}: {e}")
-            continue
+            full_text = entry.summary #fallback to summary (abstract) if extract_text_from_pdf() fails
         
         doc = Document (page_content=full_text,
                         metadata = {
@@ -37,6 +37,7 @@ def search_arxiv(query="longevity biology", max_results=5):
                         })
 
         docs.append(doc)
-        return docs
+    
+    return docs
     
 

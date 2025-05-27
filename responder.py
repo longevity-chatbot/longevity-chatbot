@@ -3,21 +3,31 @@ from openai import OpenAI
 
 client = OpenAI(api_key="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")
 
+def truncate(text, max_chars=1000):
+    return text[:max_chars] + "..." if len(text) > max_chars else text 
+
 # Prompt LLM 
 def ask_with_context(question, papers, history = None):
     
     history = history or []
     
-    context = "\n\n".join(f"{p.metadata.get('title', 'Unknown Title')}:\n{p.page_content}" for p in papers)
-
+    # Compose formatted context with metadata
+    context = "\n\n".join(
+        f"Title: {p.metadata.get('title', 'N/A')}\n"
+        f"Published: {p.metadata.get('published', 'N/A')}\n"
+        f"Source: {p.metadata.get('source', 'N/A')}\n"
+        f"DOI: {p.metadata.get('doi', 'N/A')}\n"
+        f"{truncate(p.page_content)}"
+        for p in papers
+    )
 
     # Add system-level prompt
     messages = [
         {"role": "system", "content": (
-            "You are a helpful and knowledgeable scientific assistant specialized in longevity, "
-            "cellular aging, and motility. Use the following context to answer the user's questions. "
-            "If the user follows up, base your answer on both the context and earlier conversation."
-            "Always mention the paper title and publisher."
+            "You are a scientific assistant specializing in longevity, cellular aging, and motility.\n"
+            "You must use only the following document context to answer questions. Do not make up facts.\n"
+            "If a user asks for information (e.g. publishing date or journal) and it is missing, say so.\n"
+            "Answer clearly and concisely. Cite specific papers only if their metadata is included below."
         )}
     ]
 

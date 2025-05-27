@@ -39,7 +39,7 @@ def search_europe_pmc(query="longevity biology", limit = 10):
             
             full_text = None
             for url_entry in fulltext_urls:
-                if url_entry.get("documentStyle" == "html"):
+                if url_entry.get("documentStyle") == "html":
                     full_text = extract_full_text_from_html(url_entry["url"])
                     if full_text:
                         break
