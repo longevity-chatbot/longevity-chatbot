@@ -33,27 +33,28 @@ def fetch_papers(query, max_results):
 
     return results
 
-"""
 import time
 
-def check_peer_validity(paper, verbose=False):
-   
-    #Check the peer validity of a paper using Semantic Scholar's API based on the title.
-    #Returns a dictionary with metadata and a validity boolean.
-   
 
-    # Sanitize title (remove line breaks, excess spaces)
+#Crossref API is best for verifying that a paper is published in a legitimate journal.
+
+
+def check_peer_validity(paper, verbose=False):
+    """
+    Check the peer validity of a paper using Crossref API based on the title.
+    Returns a dictionary with metadata and a validity boolean.
+    """
+    # Sanitize title
     title = " ".join(paper["title"].replace("\n", " ").split())
 
-    url = "https://api.semanticscholar.org/graph/v1/paper/search"
+    url = "https://api.crossref.org/works"
     params = {
-        "query": title,
-        "limit": 1,
-        "fields": "title,citationCount,influentialCitationCount,venue"
+        "query.title": title,
+        "rows": 1
     }
 
     headers = {
-        "User-Agent": "LongevityBot/1.0",
+        "User-Agent": "LongevityBot/1.0 (mailto:hysi.fjona9@outlook.com)",
         "Accept": "application/json"
     }
 
@@ -61,47 +62,50 @@ def check_peer_validity(paper, verbose=False):
         response = requests.get(url, params=params, headers=headers)
 
         if response.status_code != 200:
+            reason = f"API error {response.status_code}"
+            if response.status_code == 429:
+                reason += " - Rate limit exceeded"
             if verbose:
-                print(f"Semantic Scholar API error {response.status_code} for title: {paper['title']}")
+                print(f"Crossref API error {response.status_code} for title: {paper['title']}")
                 print("Response:", response.text)
-            return {"valid": False, "reason": f"API error {response.status_code}"}
+            return {"valid": False, "reason": reason}
 
         data = response.json()
+        items = data.get("message", {}).get("items", [])
 
-        if not data.get("data"):
+        if not items:
+            reason = "No match found"
             if verbose:
                 print(f"No match found for: {paper['title']}")
-            return {"valid": False, "reason": "No match"}
+            return {"valid": False, "reason": reason}
 
-        match = data["data"][0]
-        citation_count = match.get("citationCount", 0)
-        influential_count = match.get("influentialCitationCount", 0)
-        venue = match.get("venue", "").lower()
+        match = items[0]
+        journal = match.get("container-title", ["Unknown"])[0].lower()
+        doi = match.get("DOI", None)
 
-        # Heuristic for peer validity (customized for healthcare/longevity)
-        is_valid = (
-            citation_count >= 30 or
-            influential_count >= 5 or
-            any(x in venue for x in [
-                "lancet", "jama", "bmj", "nature", "nejm", "cell",
-                "science", "plos", "bioinformatics", "frontiers",
-                "aging", "gerontology", "longevity", "alzheimer", "neurology"
-            ])
-        )
+        # Heuristic for peer-reviewed venues (you can extend this as needed)
+        is_valid = doi is not None 
+        """
+        and any(x in journal for x in [
+            "lancet", "jama", "bmj", "nature", "nejm", "cell",
+            "science", "plos", "bioinformatics", "frontiers",
+            "aging", "gerontology", "longevity", "alzheimer", "neurology"
+        ])
+        """
+
+        reason = "Meets journal criteria" if is_valid else "Does not meet journal criteria"
 
         return {
             "valid": is_valid,
-            "citationCount": citation_count,
-            "influentialCitationCount": influential_count,
-            "venue": match.get("venue", "Unknown"),
-            "reason": "OK"
+            "DOI": doi,
+            "journal": match.get("container-title", ["Unknown"])[0],
+            "reason": reason
         }
 
     except Exception as e:
         if verbose:
             print(f"Exception during API call for: {paper['title']}\nError: {e}")
-        return {"valid": False, "reason": "Exception occurred"}
+        return {"valid": False, "reason": f"Exception: {e}"}
 
     finally:
-        time.sleep(1)  # Be respectful of API limits
-"""
+        time.sleep(2)  # Respect API rate limits (adjust delay as needed)

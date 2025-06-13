@@ -8,7 +8,6 @@ client = OpenAI(api_key="sk-proj-jqbwxJEg9S3ywCPERUxmkf7ISh9eMGS41YU4vx5iuH9VFbc
 
 # Prompt LLM 
 def ask_with_relevant_context(question, vectorstore):
-    print("Running the correct ask_with_relevant_context")
 
     context, citations = generate_context(vectorstore, question)
 
