@@ -3,14 +3,27 @@ from crawler.arxiv_scraper import fetch_papers
 from rag.document_store import create_vector_store
 from llm.gpt_wrapper import ask_with_relevant_context
 from crawler.arxiv_scraper import check_peer_validity
+from utils.keyword_extractor import extract_keywords
 
 def main():
 
-    question = "How many hours should I do intermmittent fasting?"
+    # Prompt the user for a question
+    question = input("❓ Your question: ").strip()
+    if not question:
+        print("🚫 No question provided. Exiting.")
+        return
+    
+    # Extract keywords to build a concise query
+    keywords = extract_keywords(question)
+    if keywords:
+        query = " ".join(keywords)
+        print(f"🔑 Extracted keywords query: {query}")
+    else:
+        query = question
+        print("⚠️ No keywords extracted, using full question as query.")
 
     print("📚 Fetching papers...")
-    papers = fetch_papers(question, max_results=5)
-
+    papers = fetch_papers(query, max_results=5)
     print(f"🔎 Total fetched: {len(papers)}")
   
     valid_papers = []
@@ -38,7 +51,7 @@ def main():
     
     print(f"\n❓ Question: {question}")
     
-    print("🤖 Calling Chat Gpt 3.5 model...")
+    print("🤖 Calling OpenAI model...")
     answer, citations = ask_with_relevant_context(question, vectorstore)
 
     print(f"\n💡 Answer: {answer}  \n✅ and Citations: {citations}")
