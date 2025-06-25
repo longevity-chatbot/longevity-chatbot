@@ -3,26 +3,57 @@ import xml.etree.ElementTree as ET
 
 
 def fetch_papers(query, max_results):
+    """Fetch papers with improved search strategies"""
+    all_results = []
+    
+    # Try multiple search strategies
+    search_queries = [
+        f"all:{query}",  # Search all fields
+        f"ti:{query}",   # Title search
+        f"abs:{query}",  # Abstract search
+        f"cat:q-bio.* AND all:{query}",  # Biology category
+    ]
+    
+    for search_query in search_queries:
+        papers = _fetch_single_query(search_query, max_results // len(search_queries) + 1)
+        all_results.extend(papers)
+        
+        # Remove duplicates based on title
+        seen_titles = set()
+        unique_results = []
+        for paper in all_results:
+            title_key = paper["title"].lower().strip()
+            if title_key not in seen_titles:
+                seen_titles.add(title_key)
+                unique_results.append(paper)
+        all_results = unique_results
+        
+        if len(all_results) >= max_results:
+            break
+    
+    return all_results[:max_results]
+
+def _fetch_single_query(search_query, max_results):
+    """Helper function to fetch papers for a single query"""
     url = "http://export.arxiv.org/api/query"
     params = {
-        "search_query": query,
+        "search_query": search_query,
         "start": 0,
-        "max_results": max_results
+        "max_results": max_results,
+        "sortBy": "relevance",
+        "sortOrder": "descending"
     }
 
     response = requests.get(url, params=params)
     
     if response.status_code != 200:
-        print("Failed to fetch papers:", response.status_code)
+        print(f"Failed to fetch papers for query '{search_query}':", response.status_code)
         return []
     
-    #parses a string into an ElementTree Object, so you can work with a tree object, kind of like navigating folders and files
     root = ET.fromstring(response.text)
-    #a unique identifier, the XML follows an Atom standard, which is a format for web feeds
     namespace = {'atom': 'http://www.w3.org/2005/Atom'}
 
     results = []
-    #all these tags belong to the atom xml namespace
     for entry in root.findall('atom:entry', namespace):
         paper = {
             "title": entry.find('atom:title', namespace).text.strip(),
