@@ -1,3 +1,10 @@
+import os
+import warnings
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Suppresses INFO and WARNING logs from TensorFlow
+
+import tensorflow as tf
+warnings.filterwarnings("ignore", category=FutureWarning)  # Suppresses some future/deprecation warnings
+warnings.filterwarnings("ignore", category=UserWarning)
 
 from langchain_community.vectorstores import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
