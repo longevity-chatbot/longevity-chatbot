@@ -1,9 +1,7 @@
 import os 
-from crawler.arxiv_scraper import fetch_papers
 from crawler.pubmed_scraper import fetch_pubmed_papers
 from rag.document_store import create_vector_store
 from llm.gpt_wrapper import ask_with_relevant_context
-from crawler.arxiv_scraper import check_peer_validity
 from utils.keyword_extractor import extract_keywords
 
 def main():
