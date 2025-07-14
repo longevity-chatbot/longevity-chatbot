@@ -23,45 +23,14 @@ def main():
         query = question
         print("⚠️ No keywords extracted, using full question as query.")
 
-    print("📚 Fetching papers from ArXiv...")
-    arxiv_papers = fetch_papers(query, max_results=3)
-    print(f"🔎 ArXiv papers: {len(arxiv_papers)}")
     
     print("📚 Fetching papers from PubMed...")
-    pubmed_papers = fetch_pubmed_papers(query, max_results=7)
-    print(f"🔎 PubMed papers: {len(pubmed_papers)}")
-    
-    # Combine all papers
-    papers = arxiv_papers + pubmed_papers
-    print(f"🔎 Total fetched: {len(papers)}")
-  
-    valid_papers = []
-    for i, paper in enumerate(papers, 1):
-        source = paper.get('source', 'ArXiv')
-        print(f"\n🔍 Checking paper {i} [{source}]: {paper['title'][:80]}...")
-        
-        # Skip validation for PubMed papers (already peer-reviewed)
-        if source == 'PubMed':
-            print(f"✅ VALID — Source: PubMed (peer-reviewed)")
-            valid_papers.append(paper)
-        else:
-            validity = check_peer_validity(paper, verbose=True)
-            if validity["valid"]:
-                print(f"✅ VALID — Venue: {validity['journal']}")
-                paper.update(validity)
-                valid_papers.append(paper)
-            else:
-                print(f"❌ INVALID — Reason: {validity['reason']}")
-
-    print(f"\n📊 Valid papers found: {len(valid_papers)}")
-
-    if not valid_papers:
-        print("🚫 No valid papers found. Exiting.")
-        return
-    
+    papers = fetch_pubmed_papers(query, max_results=10)
+    for i, paper in enumerate(papers, start = 1):
+        print(f"\n🔍 Checking paper {i}: {paper['title'][:80]}...")
 
     print("🧠 Creating vector store...")
-    vectorstore = create_vector_store(valid_papers)
+    vectorstore = create_vector_store(papers)
 
     
     print(f"\n❓ Question: {question}")
