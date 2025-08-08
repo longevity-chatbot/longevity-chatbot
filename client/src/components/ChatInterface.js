@@ -1,23 +1,33 @@
 import React, { useState } from 'react';
 
-const ChatInterface = ({ messages, updateMessages, autoRenameChat }) => {
+const ChatInterface = ({ messages, updateMessages, autoRenameChat, citationSidebarOpen, setCitationSidebarOpen }) => {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [editingIndex, setEditingIndex] = useState(null);
+  const [editText, setEditText] = useState('');
 
-  const sendMessage = async () => {
-    if (!input.trim() || loading) return;
+  const sendMessage = async (messageText = input, isEdit = false, editIndex = null) => {
+    if (!messageText.trim() || loading) return;
 
-    const userMessage = { role: 'user', content: input };
-    const newMessages = [...messages, userMessage];
+    let newMessages;
+    if (isEdit && editIndex !== null) {
+      // Remove messages from edit point onwards
+      newMessages = messages.slice(0, editIndex);
+      newMessages.push({ role: 'user', content: messageText });
+    } else {
+      const userMessage = { role: 'user', content: messageText };
+      newMessages = [...messages, userMessage];
+    }
+    
     updateMessages(newMessages);
-    setInput('');
+    if (!isEdit) setInput('');
     setLoading(true);
 
     try {
       const response = await fetch('http://localhost:8000/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: input })
+        body: JSON.stringify({ question: messageText })
       });
 
       const data = await response.json();
@@ -47,30 +57,90 @@ const ChatInterface = ({ messages, updateMessages, autoRenameChat }) => {
     }
   };
 
+  const handleEdit = (index) => {
+    setEditingIndex(index);
+    setEditText(messages[index].content);
+  };
+
+  const saveEdit = () => {
+    sendMessage(editText, true, editingIndex);
+    setEditingIndex(null);
+    setEditText('');
+  };
+
+  const cancelEdit = () => {
+    setEditingIndex(null);
+    setEditText('');
+  };
+
   return (
     <div className="chat-interface">
-
-      
+      <div className="chat-header">
+        <div></div>
+        <button 
+          className={`citation-toggle-btn ${citationSidebarOpen ? 'hidden' : ''}`}
+          onClick={() => setCitationSidebarOpen(!citationSidebarOpen)}
+          title="Toggle citations"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14,2 14,8 20,8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10,9 9,9 8,9"></polyline>
+          </svg>
+          Citations
+        </button>
+      </div>
       <div className="chat-messages">
         {messages.map((message, index) => (
           <div key={index} className={`message ${message.role}`}>
-            <div className="message-content">
-              <div>{message.content}</div>
-              {message.role === 'assistant' && (
-                <button 
-                  className="copy-btn"
-                  onClick={() => {
-                    navigator.clipboard.writeText(message.content);
-                  }}
-                  title="Copy message"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                  </svg>
-                </button>
-              )}
-            </div>
+            {editingIndex === index ? (
+              <div className="edit-container">
+                <textarea
+                  value={editText}
+                  onChange={(e) => setEditText(e.target.value)}
+                  className="edit-textarea"
+                  rows={3}
+                />
+                <div className="edit-buttons">
+                  <button onClick={saveEdit} className="save-btn">Save</button>
+                  <button onClick={cancelEdit} className="cancel-btn">Cancel</button>
+                </div>
+              </div>
+            ) : (
+              <div className="message-content">
+                <div>{message.content}</div>
+                <div className="message-actions">
+                  {message.role === 'user' && (
+                    <button 
+                      className="edit-btn"
+                      onClick={() => handleEdit(index)}
+                      title="Edit message"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                      </svg>
+                    </button>
+                  )}
+                  {message.role === 'assistant' && (
+                    <button 
+                      className="copy-btn"
+                      onClick={() => {
+                        navigator.clipboard.writeText(message.content);
+                      }}
+                      title="Copy message"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                      </svg>
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
             {message.citations && message.citations.length > 0 && (
               <div className="citations">
                 <strong>Citations:</strong>

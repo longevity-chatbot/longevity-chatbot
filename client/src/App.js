@@ -14,6 +14,21 @@ function App() {
   const [darkMode, setDarkMode] = useState(() => {
     return localStorage.getItem('darkMode') === 'true';
   });
+  const [citationSidebarOpen, setCitationSidebarOpen] = useState(false);
+
+  const getAllCitations = () => {
+    const allCitations = [];
+    chats[currentChat].forEach(message => {
+      if (message.citations && message.citations.length > 0) {
+        message.citations.forEach(citation => {
+          if (!allCitations.find(c => c.url === citation.url)) {
+            allCitations.push(citation);
+          }
+        });
+      }
+    });
+    return allCitations;
+  };
 
   const addNewChat = () => {
     const chatName = `Chat ${Object.keys(chats).length + 1}`;
@@ -97,7 +112,42 @@ function App() {
         messages={chats[currentChat]}
         updateMessages={updateCurrentChat}
         autoRenameChat={autoRenameChat}
+        citationSidebarOpen={citationSidebarOpen}
+        setCitationSidebarOpen={setCitationSidebarOpen}
       />
+      {citationSidebarOpen && (
+        <div className="citation-sidebar">
+          <div className="citation-sidebar-header">
+            <h3>Citations</h3>
+            <button 
+              className="close-citation-btn"
+              onClick={() => setCitationSidebarOpen(false)}
+            >
+              ×
+            </button>
+          </div>
+          <div className="citation-list">
+            {getAllCitations().map((citation, index) => (
+              <div key={index} className="citation-sidebar-item">
+                <div className="citation-number">[{index + 1}]</div>
+                <div className="citation-content">
+                  <a 
+                    href={citation.url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="citation-sidebar-link"
+                  >
+                    {citation.apa_format || citation.title}
+                  </a>
+                </div>
+              </div>
+            ))}
+            {getAllCitations().length === 0 && (
+              <div className="no-citations">No citations available</div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
