@@ -1,8 +1,53 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 const Sidebar = ({ chats, currentChat, setCurrentChat, addNewChat, deleteChat, renameChat, darkMode, setDarkMode }) => {
   const [editingChat, setEditingChat] = useState(null);
   const [newName, setNewName] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [showSearch, setShowSearch] = useState(false);
+  const searchRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowSearch(false);
+        setSearchQuery('');
+        setSearchResults([]);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const searchChats = (query) => {
+    if (!query.trim()) {
+      setSearchResults([]);
+      return;
+    }
+    
+    const results = [];
+    Object.entries(chats).forEach(([chatName, messages]) => {
+      messages.forEach((message, index) => {
+        if (message.content.toLowerCase().includes(query.toLowerCase())) {
+          results.push({
+            chatName,
+            messageIndex: index,
+            content: message.content,
+            role: message.role
+          });
+        }
+      });
+    });
+    setSearchResults(results);
+  };
+
+  const handleSearch = (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    searchChats(query);
+  };
 
   const handleRename = (oldName) => {
     if (newName.trim() && newName !== oldName) {
@@ -17,6 +62,53 @@ const Sidebar = ({ chats, currentChat, setCurrentChat, addNewChat, deleteChat, r
       <button className="new-chat-btn" onClick={addNewChat}>
         + New Chat
       </button>
+      <div className="search-container" ref={searchRef}>
+        <button 
+          className="search-toggle-btn"
+          onClick={() => setShowSearch(!showSearch)}
+          title="Search conversations"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.35-4.35"></path>
+          </svg>
+        </button>
+        {showSearch && (
+          <input
+            type="text"
+            placeholder="Search conversations..."
+            value={searchQuery}
+            onChange={handleSearch}
+            className="search-input"
+            autoFocus
+          />
+        )}
+      </div>
+      {searchQuery && searchResults.length > 0 && (
+        <div className="search-results">
+          <div className="search-results-header">Search Results ({searchResults.length})</div>
+          {searchResults.map((result, index) => (
+            <div 
+              key={index} 
+              className="search-result-item"
+              onClick={() => {
+                setCurrentChat(result.chatName);
+                setSearchQuery('');
+                setSearchResults([]);
+                setShowSearch(false);
+              }}
+            >
+              <div className="search-result-chat">{result.chatName}</div>
+              <div className="search-result-content">
+                {result.content.length > 80 ? result.content.substring(0, 80) + '...' : result.content}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+      {searchQuery && searchResults.length === 0 && (
+        <div className="no-search-results">No results found</div>
+      )}
       <div className="chat-list">
         {Object.keys(chats).map(chatName => (
           <div key={chatName} className={`chat-item ${chatName === currentChat ? 'active' : ''}`}>
