@@ -69,12 +69,21 @@ def fetch_pubmed_papers(query, max_results=10):
             pmid = pmid_elem.text if pmid_elem is not None else ""
             url = f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/" if pmid else ""
             
+            # Extract publication year
+            pub_year = ""
+            pub_date = article.find(".//PubDate")
+            if pub_date is not None:
+                year_elem = pub_date.find("Year")
+                if year_elem is not None:
+                    pub_year = year_elem.text
+            
             paper = {
                 "title": title.strip(),
                 "summary": abstract.strip(),
                 "authors": authors,
                 "url": url,
-                "source": "PubMed"
+                "source": "PubMed",
+                "year": pub_year
             }
             papers.append(paper)
             

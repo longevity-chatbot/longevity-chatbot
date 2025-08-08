@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const ChatInterface = ({ messages, updateMessages }) => {
+const ChatInterface = ({ messages, updateMessages, autoRenameChat }) => {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -28,7 +28,13 @@ const ChatInterface = ({ messages, updateMessages }) => {
         citations: data.citations || []
       };
 
-      updateMessages([...newMessages, assistantMessage]);
+      const finalMessages = [...newMessages, assistantMessage];
+      updateMessages(finalMessages);
+      
+      // Auto-rename after successful response
+      if (autoRenameChat) {
+        autoRenameChat(finalMessages);
+      }
     } catch (error) {
       const errorMessage = {
         role: 'assistant',
@@ -43,19 +49,42 @@ const ChatInterface = ({ messages, updateMessages }) => {
 
   return (
     <div className="chat-interface">
-      <div className="chat-header">
-        <h1>Longevity Research Assistant</h1>
-      </div>
+
       
       <div className="chat-messages">
         {messages.map((message, index) => (
           <div key={index} className={`message ${message.role}`}>
-            <div>{message.content}</div>
+            <div className="message-content">
+              <div>{message.content}</div>
+              {message.role === 'assistant' && (
+                <button 
+                  className="copy-btn"
+                  onClick={() => {
+                    navigator.clipboard.writeText(message.content);
+                  }}
+                  title="Copy message"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                  </svg>
+                </button>
+              )}
+            </div>
             {message.citations && message.citations.length > 0 && (
               <div className="citations">
                 <strong>Citations:</strong>
                 {message.citations.map((citation, i) => (
-                  <div key={i}>{citation}</div>
+                  <div key={i} className="citation-item">
+                    <a 
+                      href={citation.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="citation-link"
+                    >
+                      {citation.apa_format || `[${citation.id}] ${citation.title}`}
+                    </a>
+                  </div>
                 ))}
               </div>
             )}
