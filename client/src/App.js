@@ -15,6 +15,8 @@ function App() {
     return localStorage.getItem('darkMode') === 'true';
   });
   const [citationSidebarOpen, setCitationSidebarOpen] = useState(false);
+  const [highlightedMessageIndex, setHighlightedMessageIndex] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const getAllCitations = () => {
     const allCitations = [];
@@ -34,10 +36,28 @@ function App() {
     const chatName = `Chat ${Object.keys(chats).length + 1}`;
     setChats(prev => ({ ...prev, [chatName]: [] }));
     setCurrentChat(chatName);
+    setHighlightedMessageIndex(null);
+  };
+
+  const handleSetCurrentChat = (chatName) => {
+    setCurrentChat(chatName);
+    // Only clear highlight if switching chats manually (not from search)
+    if (highlightedMessageIndex === null) {
+      setHighlightedMessageIndex(null);
+    }
+  };
+
+  const handleSetCurrentChatFromSearch = (chatName, messageIndex, term) => {
+    setCurrentChat(chatName);
+    setHighlightedMessageIndex(messageIndex);
+    setSearchTerm(term);
   };
 
   const updateCurrentChat = (messages) => {
     setChats(prev => ({ ...prev, [currentChat]: messages }));
+    // Clear highlight when messages change
+    setHighlightedMessageIndex(null);
+    setSearchTerm('');
   };
 
   const autoRenameChat = (messages) => {
@@ -101,12 +121,13 @@ function App() {
       <Sidebar 
         chats={chats}
         currentChat={currentChat}
-        setCurrentChat={setCurrentChat}
+        setCurrentChat={handleSetCurrentChat}
         addNewChat={addNewChat}
         deleteChat={deleteChat}
         renameChat={renameChat}
         darkMode={darkMode}
         setDarkMode={setDarkMode}
+        setCurrentChatFromSearch={handleSetCurrentChatFromSearch}
       />
       <ChatInterface 
         messages={chats[currentChat]}
@@ -114,6 +135,8 @@ function App() {
         autoRenameChat={autoRenameChat}
         citationSidebarOpen={citationSidebarOpen}
         setCitationSidebarOpen={setCitationSidebarOpen}
+        highlightedMessageIndex={highlightedMessageIndex}
+        searchTerm={searchTerm}
       />
       {citationSidebarOpen && (
         <div className="citation-sidebar">

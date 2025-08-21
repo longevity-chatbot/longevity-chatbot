@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-const Sidebar = ({ chats, currentChat, setCurrentChat, addNewChat, deleteChat, renameChat, darkMode, setDarkMode }) => {
+const Sidebar = ({ chats, currentChat, setCurrentChat, addNewChat, deleteChat, renameChat, darkMode, setDarkMode, setCurrentChatFromSearch }) => {
   const [editingChat, setEditingChat] = useState(null);
   const [newName, setNewName] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -91,8 +91,9 @@ const Sidebar = ({ chats, currentChat, setCurrentChat, addNewChat, deleteChat, r
             <div 
               key={index} 
               className="search-result-item"
-              onClick={() => {
-                setCurrentChat(result.chatName);
+              onMouseDown={(e) => {
+                e.preventDefault();
+                setCurrentChatFromSearch(result.chatName, result.messageIndex, searchQuery);
                 setSearchQuery('');
                 setSearchResults([]);
                 setShowSearch(false);

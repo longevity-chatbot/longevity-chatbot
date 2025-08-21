@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 
-const ChatInterface = ({ messages, updateMessages, autoRenameChat, citationSidebarOpen, setCitationSidebarOpen }) => {
+const ChatInterface = ({ messages, updateMessages, autoRenameChat, citationSidebarOpen, setCitationSidebarOpen, highlightedMessageIndex, searchTerm }) => {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [editingIndex, setEditingIndex] = useState(null);
   const [editText, setEditText] = useState('');
+  const messagesEndRef = React.useRef(null);
+  const highlightedRef = React.useRef(null);
 
   const sendMessage = async (messageText = input, isEdit = false, editIndex = null) => {
     if (!messageText.trim() || loading) return;
@@ -73,6 +75,38 @@ const ChatInterface = ({ messages, updateMessages, autoRenameChat, citationSideb
     setEditText('');
   };
 
+  // Scroll to highlighted message when it changes
+  React.useEffect(() => {
+    if (highlightedMessageIndex !== null && highlightedRef.current) {
+      // Add delay to ensure DOM is updated after chat switch
+      setTimeout(() => {
+        if (highlightedRef.current) {
+          highlightedRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
+    }
+  }, [highlightedMessageIndex, messages]);
+
+  // Auto-scroll to bottom for new messages
+  React.useEffect(() => {
+    if (highlightedMessageIndex === null) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages.length, highlightedMessageIndex]);
+
+  const highlightText = (text, term) => {
+    if (!term || !text) return text;
+    
+    const regex = new RegExp(`(${term})`, 'gi');
+    const parts = text.split(regex);
+    
+    return parts.map((part, index) => 
+      regex.test(part) ? 
+        <mark key={index} className="search-highlight">{part}</mark> : 
+        part
+    );
+  };
+
   return (
     <div className="chat-interface">
       <div className="chat-header">
@@ -94,7 +128,11 @@ const ChatInterface = ({ messages, updateMessages, autoRenameChat, citationSideb
       </div>
       <div className="chat-messages">
         {messages.map((message, index) => (
-          <div key={index} className={`message ${message.role}`}>
+          <div 
+            key={index} 
+            ref={index === highlightedMessageIndex ? highlightedRef : null}
+            className={`message ${message.role} ${index === highlightedMessageIndex ? 'highlighted' : ''}`}
+          >
             {editingIndex === index ? (
               <div className="edit-container">
                 <textarea
@@ -110,7 +148,7 @@ const ChatInterface = ({ messages, updateMessages, autoRenameChat, citationSideb
               </div>
             ) : (
               <div className="message-content">
-                <div>{message.content}</div>
+                <div>{highlightText(message.content, searchTerm)}</div>
                 <div className="message-actions">
                   {message.role === 'user' && (
                     <button 
@@ -161,6 +199,7 @@ const ChatInterface = ({ messages, updateMessages, autoRenameChat, citationSideb
           </div>
         ))}
         {loading && <div className="message assistant loading">Searching research papers...</div>}
+        <div ref={messagesEndRef} />
       </div>
 
       <div className="chat-input">
