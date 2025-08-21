@@ -28,14 +28,21 @@ def generate_context(vectorstore, query):
     # Build context string and keep references
     context_parts = []
     citations = []
+    seen_urls = set()  # Track unique citations
     
-    for i, doc in enumerate(final_docs, start=1):
+    citation_id = 1
+    for doc in final_docs:
         content = doc.page_content.strip()
         title = doc.metadata.get("title", "Unknown Title")
         url = doc.metadata.get("url", "No URL")
+        
+        # Skip duplicate citations based on URL
+        if url in seen_urls:
+            continue
+        seen_urls.add(url)
 
         # Add summary to the context
-        context_parts.append(f"[{i}] {content}")
+        context_parts.append(f"[{citation_id}] {content}")
         
         # Generate proper APA 7 citation
         from datetime import datetime
@@ -62,12 +69,13 @@ def generate_context(vectorstore, query):
         apa_citation = f"{author_text} ({year}). {title}. PubMed. Retrieved from {url}"
         
         citation = {
-            "id": i,
+            "id": citation_id,
             "title": title,
             "url": url,
             "apa_format": apa_citation
         }
         citations.append(citation)
+        citation_id += 1
 
     context = "\n\n".join(context_parts)
     return context, citations

@@ -29,15 +29,22 @@ def ask_with_relevant_context(question, vectorstore):
     context, citations = generate_context(vectorstore, question)
     conversation.update_context(context, citations)
 
+    # Create citation reference list for the AI (internal use only)
+    citation_refs = "\n".join([f"[{c['id']}] {c['apa_format']}" for c in citations])
+    
     prompt = f"""Use the following scientific context to answer the question:
 
 {context}
 
+Reference Citations (for internal use):
+{citation_refs}
+
 Instructions:
-- Answer the user's question directly using only the context.
+- Answer the user's question directly using only the context provided above.
 - Focus specifically on what the user asked - don't drift into unrelated topics.
 - If the context doesn't directly address the question, say so clearly.
-- Include at least one scientific citation (year ≥ 2020) from the context if possible.
+- When referencing studies, use citation numbers [1], [2], etc. that match the reference list.
+- Only reference citations that exist in the reference list above.
 - Write in clear, layman-friendly language suitable for educated non-experts.
 
 Q: {question}

@@ -23,7 +23,7 @@ class SessionCache:
         self.vectorstore = vectorstore
         self.last_query_keywords = query_keywords
         
-    def is_similar_query(self, new_keywords, threshold=0.7):
+    def is_similar_query(self, new_keywords, threshold=0.5):
         """Check if new query is similar to cached one"""
         if not self.last_query_keywords:
             return False
@@ -35,5 +35,17 @@ class SessionCache:
         if not old_words or not new_words:
             return False
             
-        overlap = len(old_words.intersection(new_words))
-        return overlap / len(old_words.union(new_words)) >= threshold
+        # Use Jaccard similarity: intersection / union
+        intersection = len(old_words.intersection(new_words))
+        union = len(old_words.union(new_words))
+        
+        similarity = intersection / union if union > 0 else 0
+        
+        print(f"Cache similarity check:")
+        print(f"  Old: {old_words}")
+        print(f"  New: {new_words}")
+        print(f"  Intersection: {old_words.intersection(new_words)}")
+        print(f"  Similarity: {similarity:.2f} (threshold: {threshold})")
+        print(f"  Using cache: {similarity >= threshold}")
+        
+        return similarity >= threshold
