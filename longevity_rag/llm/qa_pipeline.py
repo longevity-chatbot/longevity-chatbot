@@ -7,14 +7,29 @@ def generate_context(vectorstore, query):
     return context
 """
 def generate_context(vectorstore, query):
-    # Get top-k similar documents
-    docs = vectorstore.similarity_search(query, k=3)
+    # Get more candidates for better filtering
+    docs = vectorstore.similarity_search(query, k=5)
+    
+    # Filter for longevity relevance
+    longevity_keywords = {
+        "longevity", "lifespan", "healthspan", "aging", "ageing", "biomarker",
+        "mortality", "senescence", "cardiovascular", "metabolic", "cognitive"
+    }
+    
+    relevant_docs = []
+    for doc in docs:
+        content_lower = (doc.page_content + " " + doc.metadata.get("title", "")).lower()
+        if any(keyword in content_lower for keyword in longevity_keywords):
+            relevant_docs.append(doc)
+    
+    # Use top 3 relevant docs, fallback to original if none found
+    final_docs = relevant_docs[:3] if relevant_docs else docs[:3]
     
     # Build context string and keep references
     context_parts = []
     citations = []
     
-    for i, doc in enumerate(docs, start=1):
+    for i, doc in enumerate(final_docs, start=1):
         content = doc.page_content.strip()
         title = doc.metadata.get("title", "Unknown Title")
         url = doc.metadata.get("url", "No URL")

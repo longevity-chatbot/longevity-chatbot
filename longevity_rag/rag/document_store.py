@@ -12,6 +12,9 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain.docstore.document import Document
 
 def create_vector_store(papers):
+    if not papers:
+        raise ValueError("Cannot create vector store with empty papers list")
+    
     #generates embeddings (numerical representations) for each paper's summary using a pre-trained model (all-MiniLM-L6-v2)
     embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
     #creates a list of Document objects, each containing a paper's summary and title. 
