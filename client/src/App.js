@@ -18,8 +18,21 @@ function App() {
   const [citationSidebarOpen, setCitationSidebarOpen] = useState(false);
   const [highlightedMessageIndex, setHighlightedMessageIndex] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [showProfileModal, setShowProfileModal] = useState(true);
-  const [userProfile, setUserProfile] = useState(null);
+  const [showProfileModal, setShowProfileModal] = useState(() => {
+    return !localStorage.getItem('userProfile');
+  });
+  const [userProfile, setUserProfile] = useState(() => {
+    const saved = localStorage.getItem('userProfile');
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [userId] = useState(() => {
+    let id = localStorage.getItem('userId');
+    if (!id) {
+      id = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem('userId', id);
+    }
+    return id;
+  });
 
   const getAllCitations = () => {
     const allCitations = [];
@@ -71,7 +84,7 @@ function App() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          session_name: sessionName,
+          session_name: `${userId}_${sessionName}`,
           messages: messages,
           user_profile: userProfile
         })
@@ -82,8 +95,12 @@ function App() {
   };
 
   const handleProfileSubmit = async (profile) => {
-    setUserProfile(profile);
+    const profileWithId = { ...profile, user_id: userId };
+    setUserProfile(profileWithId);
     setShowProfileModal(false);
+    
+    // Save to localStorage
+    localStorage.setItem('userProfile', JSON.stringify(profileWithId));
     
     // Save profile to database
     try {
@@ -91,8 +108,8 @@ function App() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          session_name: currentChat,
-          user_profile: profile
+          session_name: `${userId}_${currentChat}`,
+          user_profile: profileWithId
         })
       });
     } catch (error) {
