@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ChatInterface from './components/ChatInterface';
 import Sidebar from './components/Sidebar';
+import UserProfileModal from './components/UserProfileModal';
 import './App.css';
 
 function App() {
@@ -17,6 +18,8 @@ function App() {
   const [citationSidebarOpen, setCitationSidebarOpen] = useState(false);
   const [highlightedMessageIndex, setHighlightedMessageIndex] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showProfileModal, setShowProfileModal] = useState(true);
+  const [userProfile, setUserProfile] = useState(null);
 
   const getAllCitations = () => {
     const allCitations = [];
@@ -55,9 +58,46 @@ function App() {
 
   const updateCurrentChat = (messages) => {
     setChats(prev => ({ ...prev, [currentChat]: messages }));
+    // Auto-save to database
+    saveChatToDatabase(currentChat, messages);
     // Clear highlight when messages change
     setHighlightedMessageIndex(null);
     setSearchTerm('');
+  };
+
+  const saveChatToDatabase = async (sessionName, messages) => {
+    try {
+      await fetch('http://localhost:8000/api/save-chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session_name: sessionName,
+          messages: messages,
+          user_profile: userProfile
+        })
+      });
+    } catch (error) {
+      console.error('Failed to save chat:', error);
+    }
+  };
+
+  const handleProfileSubmit = async (profile) => {
+    setUserProfile(profile);
+    setShowProfileModal(false);
+    
+    // Save profile to database
+    try {
+      await fetch('http://localhost:8000/api/save-profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session_name: currentChat,
+          user_profile: profile
+        })
+      });
+    } catch (error) {
+      console.error('Failed to save profile:', error);
+    }
   };
 
   const autoRenameChat = (messages) => {
@@ -118,6 +158,11 @@ function App() {
 
   return (
     <div className={`app ${darkMode ? 'dark' : 'light'}`}>
+      <UserProfileModal 
+        isOpen={showProfileModal}
+        onSubmit={handleProfileSubmit}
+        onClose={() => setShowProfileModal(false)}
+      />
       <Sidebar 
         chats={chats}
         currentChat={currentChat}
