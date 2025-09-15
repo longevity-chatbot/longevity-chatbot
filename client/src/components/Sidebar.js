@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-const Sidebar = ({ chats, currentChat, setCurrentChat, addNewChat, deleteChat, renameChat, darkMode, setDarkMode, setCurrentChatFromSearch }) => {
+const Sidebar = ({ chats, currentChat, setCurrentChat, addNewChat, deleteChat, renameChat, darkMode, setDarkMode, setCurrentChatFromSearch, exportCurrentChat }) => {
   const [editingChat, setEditingChat] = useState(null);
   const [newName, setNewName] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [showSearch, setShowSearch] = useState(false);
+  const [showExportDropdown, setShowExportDropdown] = useState(false);
   const searchRef = useRef(null);
+  const exportRef = useRef(null);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -14,6 +16,9 @@ const Sidebar = ({ chats, currentChat, setCurrentChat, addNewChat, deleteChat, r
         setShowSearch(false);
         setSearchQuery('');
         setSearchResults([]);
+      }
+      if (exportRef.current && !exportRef.current.contains(event.target)) {
+        setShowExportDropdown(false);
       }
     };
 
@@ -164,6 +169,37 @@ const Sidebar = ({ chats, currentChat, setCurrentChat, addNewChat, deleteChat, r
             )}
           </div>
         ))}
+      </div>
+      <div className="export-section" ref={exportRef}>
+        <button 
+          className="export-main-btn"
+          onClick={() => setShowExportDropdown(!showExportDropdown)}
+          title="Export current chat"
+        >
+          📤 Export Chat
+        </button>
+        {showExportDropdown && (
+          <div className="export-dropdown">
+            <button 
+              className="export-option"
+              onClick={() => {
+                exportCurrentChat('csv');
+                setShowExportDropdown(false);
+              }}
+            >
+              📊 CSV
+            </button>
+            <button 
+              className="export-option"
+              onClick={() => {
+                exportCurrentChat('json');
+                setShowExportDropdown(false);
+              }}
+            >
+              📄 JSON
+            </button>
+          </div>
+        )}
       </div>
       <button 
         className="theme-toggle-bottom"

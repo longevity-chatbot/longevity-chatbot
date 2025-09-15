@@ -924,3 +924,91 @@
   background: rgba(45, 55, 72, 0.95);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
 }
+
+.export-section {
+  position: absolute;
+  bottom: 80px;
+  left: 20px;
+  right: 20px;
+}
+
+.export-main-btn {
+  width: 100%;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #2d3748;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.export-main-btn:hover {
+  background: rgba(255, 255, 255, 0.95);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.export-dropdown {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.export-option {
+  width: 100%;
+  padding: 8px 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  color: #2d3748;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.export-option:hover {
+  background: rgba(102, 126, 234, 0.1);
+}
+
+.export-option:first-child {
+  border-radius: 8px 8px 0 0;
+}
+
+.export-option:last-child {
+  border-radius: 0 0 8px 8px;
+}
+
+.app.dark .export-main-btn {
+  background: rgba(45, 55, 72, 0.8);
+  border: 1px solid rgba(45, 55, 72, 0.3);
+  color: #e2e8f0;
+}
+
+.app.dark .export-main-btn:hover {
+  background: rgba(45, 55, 72, 0.95);
+}
+
+.app.dark .export-dropdown {
+  background: rgba(45, 55, 72, 0.95);
+  border: 1px solid rgba(45, 55, 72, 0.3);
+}
+
+.app.dark .export-option {
+  color: #e2e8f0;
+}
+
+.app.dark .export-option:hover {
+  background: rgba(102, 126, 234, 0.2);
+}

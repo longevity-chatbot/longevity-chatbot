@@ -55,9 +55,49 @@ function App() {
 
   const updateCurrentChat = (messages) => {
     setChats(prev => ({ ...prev, [currentChat]: messages }));
+    // Auto-save to database
+    saveChatToDatabase(currentChat, messages);
     // Clear highlight when messages change
     setHighlightedMessageIndex(null);
     setSearchTerm('');
+  };
+
+  const saveChatToDatabase = async (sessionName, messages) => {
+    try {
+      await fetch('http://localhost:8000/api/save-chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session_name: sessionName,
+          messages: messages
+        })
+      });
+    } catch (error) {
+      console.error('Failed to save chat:', error);
+    }
+  };
+
+  const loadChatsFromDatabase = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/sessions');
+      const data = await response.json();
+      if (data.status === 'success') {
+        const loadedChats = {};
+        for (const sessionName of data.sessions) {
+          const chatResponse = await fetch(`http://localhost:8000/api/load-chat/${encodeURIComponent(sessionName)}`);
+          const chatData = await chatResponse.json();
+          if (chatData.status === 'success') {
+            loadedChats[sessionName] = chatData.messages;
+          }
+        }
+        if (Object.keys(loadedChats).length > 0) {
+          setChats(loadedChats);
+          setCurrentChat(Object.keys(loadedChats)[0]);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load chats:', error);
+    }
   };
 
   const autoRenameChat = (messages) => {
@@ -102,6 +142,46 @@ function App() {
     }
   };
 
+  const exportCurrentChat = (format) => {
+    const chatData = {
+      chat_name: currentChat,
+      messages: chats[currentChat],
+      export_date: new Date().toISOString()
+    };
+    
+    let content, filename, mimeType;
+    
+    if (format === 'json') {
+      content = JSON.stringify(chatData, null, 2);
+      filename = `${currentChat}_${new Date().toISOString().split('T')[0]}.json`;
+      mimeType = 'application/json';
+    } else {
+      // CSV format
+      const csvRows = [['role', 'content', 'timestamp']];
+      chatData.messages.forEach(msg => {
+        csvRows.push([msg.role, `"${msg.content.replace(/"/g, '""')}"`, new Date().toISOString()]);
+      });
+      content = csvRows.map(row => row.join(',')).join('\n');
+      filename = `${currentChat}_${new Date().toISOString().split('T')[0]}.csv`;
+      mimeType = 'text/csv';
+    }
+    
+    const blob = new Blob([content], { type: mimeType });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  };
+
+  // Load chats from database on startup
+  useEffect(() => {
+    loadChatsFromDatabase();
+  }, []);
+
   // Save to localStorage whenever chats or currentChat changes
   useEffect(() => {
     localStorage.setItem('chats', JSON.stringify(chats));
@@ -128,6 +208,7 @@ function App() {
         darkMode={darkMode}
         setDarkMode={setDarkMode}
         setCurrentChatFromSearch={handleSetCurrentChatFromSearch}
+        exportCurrentChat={exportCurrentChat}
       />
       <ChatInterface 
         messages={chats[currentChat]}
