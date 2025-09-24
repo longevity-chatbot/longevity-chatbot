@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-const Sidebar = ({ chats, currentChat, setCurrentChat, addNewChat, deleteChat, renameChat, darkMode, setDarkMode, setCurrentChatFromSearch }) => {
+const Sidebar = ({ chats, currentChat, setCurrentChat, addNewChat, deleteChat, renameChat, darkMode, setDarkMode, setCurrentChatFromSearch, exportCurrentChat }) => {
   const [editingChat, setEditingChat] = useState(null);
   const [newName, setNewName] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [showSearch, setShowSearch] = useState(false);
+  const [showExportDropdown, setShowExportDropdown] = useState(false);
   const searchRef = useRef(null);
+  const exportRef = useRef(null);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -14,6 +16,9 @@ const Sidebar = ({ chats, currentChat, setCurrentChat, addNewChat, deleteChat, r
         setShowSearch(false);
         setSearchQuery('');
         setSearchResults([]);
+      }
+      if (exportRef.current && !exportRef.current.contains(event.target)) {
+        setShowExportDropdown(false);
       }
     };
 
@@ -178,6 +183,114 @@ const Sidebar = ({ chats, currentChat, setCurrentChat, addNewChat, deleteChat, r
           )}
         </svg>
       </button>
+      <div className="export-section" ref={exportRef} style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        marginTop: '10px',
+        position: 'relative'
+      }}>
+        <button 
+          className="export-main-btn"
+          onClick={() => setShowExportDropdown(!showExportDropdown)}
+          title="Export current chat"
+          style={{
+            background: 'white',
+            color: '#333',
+            border: '1px solid #ddd',
+            borderRadius: '20px',
+            padding: '8px 16px',
+            fontSize: '13px',
+            fontWeight: '500',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            transition: 'all 0.2s ease',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+            e.target.style.color = 'white';
+            e.target.style.border = 'none';
+            e.target.style.transform = 'translateY(-1px)';
+            e.target.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.4)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = 'white';
+            e.target.style.color = '#333';
+            e.target.style.border = '1px solid #ddd';
+            e.target.style.transform = 'translateY(0)';
+            e.target.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+          }}
+        >
+          📤 Export Chat
+        </button>
+        {showExportDropdown && (
+          <div className="export-dropdown" style={{
+            position: 'absolute',
+            bottom: '100%',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: 'white',
+            borderRadius: '8px',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+            padding: '8px',
+            marginBottom: '8px',
+            minWidth: '120px',
+            zIndex: 1000
+          }}>
+            <button 
+              className="export-option"
+              onClick={() => {
+                exportCurrentChat('csv');
+                setShowExportDropdown(false);
+              }}
+              style={{
+                width: '100%',
+                padding: '8px 12px',
+                border: 'none',
+                background: 'transparent',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                transition: 'background 0.2s ease'
+              }}
+              onMouseEnter={(e) => e.target.style.background = '#f0f0f0'}
+              onMouseLeave={(e) => e.target.style.background = 'transparent'}
+            >
+              📊 CSV
+            </button>
+            <button 
+              className="export-option"
+              onClick={() => {
+                exportCurrentChat('json');
+                setShowExportDropdown(false);
+              }}
+              style={{
+                width: '100%',
+                padding: '8px 12px',
+                border: 'none',
+                background: 'transparent',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                transition: 'background 0.2s ease'
+              }}
+              onMouseEnter={(e) => e.target.style.background = '#f0f0f0'}
+              onMouseLeave={(e) => e.target.style.background = 'transparent'}
+            >
+              📄 JSON
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

@@ -159,6 +159,41 @@ function App() {
     }
   };
 
+  const exportCurrentChat = (format) => {
+    const chatData = {
+      chat_name: currentChat,
+      messages: chats[currentChat],
+      export_date: new Date().toISOString()
+    };
+    
+    let content, filename, mimeType;
+    
+    if (format === 'json') {
+      content = JSON.stringify(chatData, null, 2);
+      filename = `${currentChat}_${new Date().toISOString().split('T')[0]}.json`;
+      mimeType = 'application/json';
+    } else {
+      // CSV format
+      const csvRows = [['role', 'content', 'timestamp']];
+      chatData.messages.forEach(msg => {
+        csvRows.push([msg.role, `"${msg.content.replace(/"/g, '""')}"`, new Date().toISOString()]);
+      });
+      content = csvRows.map(row => row.join(',')).join('\n');
+      filename = `${currentChat}_${new Date().toISOString().split('T')[0]}.csv`;
+      mimeType = 'text/csv';
+    }
+    
+    const blob = new Blob([content], { type: mimeType });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  };
+
   // Save to localStorage whenever chats or currentChat changes
   useEffect(() => {
     localStorage.setItem('chats', JSON.stringify(chats));
@@ -190,6 +225,7 @@ function App() {
         darkMode={darkMode}
         setDarkMode={setDarkMode}
         setCurrentChatFromSearch={handleSetCurrentChatFromSearch}
+        exportCurrentChat={exportCurrentChat}
       />
       <ChatInterface 
         messages={chats[currentChat]}
