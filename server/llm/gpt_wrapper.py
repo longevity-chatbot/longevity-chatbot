@@ -1,7 +1,7 @@
 import os
 from openai import OpenAI
-from llm.qa_pipeline import generate_context
-from llm.conversation_handler import ConversationHandler
+from .qa_pipeline import generate_context
+from .conversation_handler import ConversationHandler
 from dotenv import load_dotenv
 
 # Load environment variables from .env file

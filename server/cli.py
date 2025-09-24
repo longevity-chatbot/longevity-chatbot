@@ -1,9 +1,9 @@
 import os 
-from crawler.pubmed_scraper import fetch_pubmed_papers
-from rag.document_store import create_vector_store
-from llm.gpt_wrapper import ask_with_relevant_context
-from utils.keyword_extractor import extract_keywords
-from cache.session_cache import SessionCache
+from .crawler.pubmed_scraper import fetch_pubmed_papers
+from .rag.document_store import create_vector_store
+from .llm.gpt_wrapper import ask_with_relevant_context
+from .utils.keyword_extractor import extract_keywords
+from .cache.session_cache import SessionCache
 
 def main():
     session_cache = SessionCache()
@@ -16,7 +16,7 @@ def main():
         
         print(f"📝 Processing question: '{question}'")
 
-        from utils.keyword_extractor import create_longevity_query
+        from .utils.keyword_extractor import create_longevity_query
         try:
             query_keywords = create_longevity_query(question)
             print(f"🔍 Search query: '{query_keywords}'")
