@@ -1,19 +1,12 @@
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
-import sys
-import os
 
-# Add longevity_rag to path
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'longevity_rag'))
-# Add server to path
-sys.path.append(os.path.dirname(__file__))
-
-from crawler.pubmed_scraper import fetch_pubmed_papers
-from rag.document_store import create_vector_store
-from llm.gpt_wrapper import ask_with_relevant_context
-from utils.keyword_extractor import extract_keywords
-from cache.session_cache import SessionCache
-from database import ChatDatabase
+from .crawler.pubmed_scraper import fetch_pubmed_papers
+from .rag.document_store import create_vector_store
+from .llm.gpt_wrapper import ask_with_relevant_context
+from .utils.keyword_extractor import extract_keywords
+from .cache.session_cache import SessionCache
+from .database import ChatDatabase
 
 app = FastAPI(title="Longevity Chatbot API")
 

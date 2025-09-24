@@ -52,13 +52,12 @@ streamlit run streamlit-ui/app.py
 
 **Option C: Command Line**
 ```bash
-python longevity_rag/main.py
+python server/cli.py
 ```
 
 ## 📁 Project Structure
 
-- `longevity_rag/` - Core RAG pipeline (Python)
-- `server/` - FastAPI backend
+- `server/` - FastAPI backend with RAG pipeline
 - `client/` - React frontend
 - `streamlit-ui/` - Alternative Streamlit interface
 
