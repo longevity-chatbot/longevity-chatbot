@@ -8,7 +8,7 @@ An intelligent chatbot that answers questions about **longevity, biomarkers, and
 - **Modern React UI** with chat history and citations
 - **Smart caching** to avoid redundant API calls
 - **FastAPI server** for scalable deployment
-- **Multiple interfaces** - React web app, Streamlit, or CLI
+- **Multiple interfaces** - React web app or CLI
 
 ## 🛠️ Setup
 
@@ -33,34 +33,47 @@ OPENAI_API_KEY=your_openai_api_key_here
 
 ### 3. Run the Application
 
+**IMPORTANT: Always run commands from the project root directory (`longevity-chatbot/`)**
+
 **Option A: React Web App (Recommended)**
 ```bash
-# Start server
+# Start server (from project root)
 uvicorn server.main:app --reload
 
-# Start client (new terminal)
+# Start client (new terminal, from project root)
 cd client
 npm install
 npm start
 ```
 Access at `http://localhost:3000`
 
-**Option B: Streamlit Interface**
+**Option B: Command Line**
 ```bash
-streamlit run streamlit-ui/app.py
-```
-
-**Option C: Command Line**
-```bash
-python longevity_rag/main.py
+# From project root
+python -m server.cli
 ```
 
 ## 📁 Project Structure
 
-- `longevity_rag/` - Core RAG pipeline (Python)
-- `server/` - FastAPI backend
-- `client/` - React frontend
-- `streamlit-ui/` - Alternative Streamlit interface
+```
+longevity-chatbot/
+├── server/                 # FastAPI backend with RAG pipeline
+│   ├── cache/             # Session caching
+│   ├── crawler/           # PubMed data fetching
+│   ├── llm/              # OpenAI integration & conversation handling
+│   ├── rag/              # Vector store & document processing
+│   ├── utils/            # Keyword extraction utilities
+│   ├── main.py           # FastAPI server
+│   ├── cli.py            # Command line interface
+│   └── database.py       # Chat history database
+├── client/               # React frontend
+│   ├── src/
+│   ├── public/
+│   └── package.json
+├── requirements.txt      # Python dependencies
+├── .env                  # Environment variables
+└── README.md
+```
 
 ## 📜 License
 
