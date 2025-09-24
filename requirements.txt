@@ -10,3 +10,4 @@ streamlit
 fastapi
 uvicorn
 python-dotenv
+pyspellchecker>=0.7.2

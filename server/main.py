@@ -5,6 +5,7 @@ from .crawler.pubmed_scraper import fetch_pubmed_papers
 from .rag.document_store import create_vector_store
 from .llm.gpt_wrapper import ask_with_relevant_context
 from .utils.keyword_extractor import extract_keywords
+from .utils.spell_corrector import correct_spelling
 from .cache.session_cache import SessionCache
 from .database import ChatDatabase
 
@@ -28,8 +29,11 @@ async def chat(message: dict):
     try:
         question = message["question"]
         
+        # Correct spelling errors
+        corrected_question = correct_spelling(question)
+        
         # Extract keywords and check cache
-        keywords = extract_keywords(question)
+        keywords = extract_keywords(corrected_question)
         query_keywords = " ".join(keywords) if keywords else question
         
         if session_cache.has_vectorstore() and session_cache.is_similar_query(query_keywords):
@@ -39,7 +43,7 @@ async def chat(message: dict):
             vectorstore = create_vector_store(papers)
             session_cache.set_vectorstore(vectorstore, query_keywords)
         
-        answer, citations = ask_with_relevant_context(question, vectorstore)
+        answer, citations = ask_with_relevant_context(corrected_question, vectorstore)
         
         return {
             "answer": answer,
