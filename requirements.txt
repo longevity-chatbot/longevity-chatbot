@@ -17,6 +17,11 @@ en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_
 streamlit
 fastapi
 uvicorn
+beautifulsoup4
+lxml
+nltk
+pyspellchecker
+faiss-cpu
 
 # Utilities
 python-dotenv
