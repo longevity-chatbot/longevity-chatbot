@@ -1,3 +1,9 @@
+--only-binary=:all:
+numpy==1.26.4
+spacy==3.7.2    
+blis==0.7.11
+thinc==8.2.2
+
 aext-assistant @ file:///C:/b/abs_7e0qjcige6/croot/aext-assistant_1717062202219/work
 aext-assistant-server @ file:///C:/b/abs_261y2c9vsm/croot/aext-assistant-server_1717060019302/work
 aext-core @ file:///C:/b/abs_1e882xlg8y/croot/aext-core_1717056431204/work
