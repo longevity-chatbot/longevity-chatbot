@@ -343,6 +343,7 @@
   padding: 20px 24px;
   border-radius: 20px;
   max-width: 75%;
+  width: fit-content;
   backdrop-filter: blur(10px);
   transition: all 0.3s ease;
 }
