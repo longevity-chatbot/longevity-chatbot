@@ -1,14 +1,26 @@
+# Core dependencies
 requests>=2.31.0
 openai>=1.0.0
 langchain>=0.1.0
-langchain-community>=0.0.20
-chromadb>=0.4.0
+langchain-community>=0.2.0  # updated to avoid spaCy<3.6 pin
+chromadb>=0.5.0             # updated for spaCy 3.7 compatibility
 sentence-transformers>=2.2.0
-en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.5.0/en_core_web_sm-3.5.0-py3-none-any.whl
+
+# SpaCy and NLP dependencies
+spacy==3.7.2
+en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl
+thinc>=8.2.0,<9             # Thinc compatible with spaCy 3.7.2
+blis>=0.7.9                 # Avoid old blis pins
+srsly>=2.4.8
+cymem>=2.0.8
+preshed>=3.0.9
+murmurhash>=1.0.10
+
+# Web and API
 streamlit
 fastapi
 uvicorn
 python-dotenv
+
+# Misc
 pyspellchecker>=0.7.2
-spacy==3.5.0
-blis==0.1.11
